@@ -1,18 +1,24 @@
 - git:
     local-name: isri-aist/BaselineFootstepPlanner
     uri: https://github.com/isri-aist/BaselineFootstepPlanner
+    version: ros1
 - git:
     local-name: isri-aist/CentroidalControlCollection
     uri: https://github.com/isri-aist/CentroidalControlCollection
+    version: master
 - git:
     local-name: isri-aist/ForceControlCollection
     uri: https://github.com/isri-aist/ForceControlCollection
+    version: ros1
 - git:
     local-name: isri-aist/NMPC
     uri: https://github.com/isri-aist/NMPC
+    version: ros1
 - git:
     local-name: isri-aist/QpSolverCollection
     uri: https://github.com/isri-aist/QpSolverCollection
+    version: ros1
 - git:
     local-name: isri-aist/TrajectoryCollection
     uri: https://github.com/isri-aist/TrajectoryCollection
+    version: ros1

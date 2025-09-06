@@ -1,8 +1,8 @@
 ---
 # If true, the FSM transitions are managed by an external tool
-Managed: false
+Managed: true
 # If true and the FSM is self-managed, transitions should be triggered
-StepByStep: true
+StepByStep: false
 # Change idle behaviour, if true the state is kept until transition,
 # otherwise the FSM holds the last state until transition
 IdleKeepState: true
@@ -51,6 +51,10 @@ transitions:
   - [BWC::Initial_, OK, BWC::Main_, Auto]
 # Initial state
 init: BWC::Initial_
+
+transitions:
+  - [BWC::Initial_, OK, BWC::ConfigWalk_, Auto]
+
 
 ObserverPipelines:
   name: MainObserverPipeline
@@ -189,7 +193,7 @@ CentroidalManager:
   zmpVelGain: 0.02
   comZGainP: 2000.0
   comZGainD: 500.0
-  refComZ: 0.825 # [m]
+  refComZ: 0.82 # [m]
   useTargetPoseForControlRobotAnchorFrame: true
   useActualComForWrenchDist: false
   actualComOffset: [0.0, 0.0, 0.0]
@@ -279,34 +283,35 @@ robots:
   ground:
     module: env/ground
 
-  # Robot-specific configurations
-  jvrc1:
+  REEMC:
     PostureTask:
-      jointWeights:
-        WAIST_R: 10
-        WAIST_P: 10
+      # jointWeights:
+      #   torso_2_joint: 10
       # For arm swing
       jointGains:
-        - jointName: R_SHOULDER_P
+        - jointName: arm_right_1_joint
           stiffness: 400
-        - jointName: L_SHOULDER_P
+        - jointName: arm_left_1_joint
           stiffness: 400
 
     CoMTask:
-      activeJoints: [
+      activeJoints: [ 
       "Root",
-      "R_HIP_Y", "R_HIP_R", "R_HIP_P", "R_KNEE", "R_ANKLE_P", "R_ANKLE_R",
-      "L_HIP_Y", "L_HIP_R", "L_HIP_P", "L_KNEE", "L_ANKLE_P", "L_ANKLE_R"]
+      "leg_right_1_joint", "leg_right_2_joint", "leg_right_3_joint", 
+      "leg_right_4_joint", "leg_right_5_joint", "leg_right_6_joint", 
+      "leg_left_1_joint", "leg_left_2_joint", "leg_left_3_joint",
+      "leg_left_4_joint", "leg_left_5_joint", "leg_left_6_joint"
+      ]
 
     BaseOrientationTask:
-      frame: WAIST_R_S
+      frame: base_link
 
     FootManager:
       enableArmSwing: true
       jointAnglesForArmSwing:
         Left:
-          R_SHOULDER_P: [-0.13962634015954636] # -8
-          L_SHOULDER_P: [0.06981317007977318] # 4
+          arm_right_1_joint: [-0.13962634015954636] # -8
+          arm_left_1_joint: [0.06981317007977318] # 4
         Right:
-          R_SHOULDER_P: [0.06981317007977318] # 4
-          L_SHOULDER_P: [-0.13962634015954636] # -8
+          arm_right_1_joint: [0.06981317007977318] # 4
+          arm_left_1_joint: [-0.13962634015954636] # -8

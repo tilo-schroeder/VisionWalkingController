@@ -1,4 +1,4 @@
-MainRobot: JVRC1
+MainRobot: REEMC
 
 Enabled: BaselineWalkingController
 ControllerModulePaths: ["@CATKIN_DEVEL_PREFIX@/lib/mc_controller/"]
