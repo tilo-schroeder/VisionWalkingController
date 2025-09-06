@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.10)
 
-set(PROJECT_NAME baseline_walking_controller)
+set(PROJECT_NAME vision_walking_controller)
 set(PROJECT_GENERATED_HEADERS_SKIP_DEPRECATED ON)
 set(PROJECT_GENERATED_HEADERS_SKIP_CONFIG ON)
 set(PROJECT_GENERATED_HEADERS_SKIP_WARNING ON)
-set(PROJECT_URL https://github.com/isri-aist/BaselineWalkingController)
+set(PROJECT_URL https://github.com/tilo-schroeder/VisionWalkingController)
 set(PROJECT_DESCRIPTION "")
 set(CMAKE_CXX_STANDARD 17)
 set(PROJECT_USE_CMAKE_EXPORT TRUE)
@@ -13,7 +13,7 @@ set(CMAKE_COLOR_DIAGNOSTICS ON)
 option(INSTALL_DOCUMENTATION "Generate and install the documentation" OFF)
 
 include(cmake/base.cmake)
-project(baseline_walking_controller LANGUAGES CXX)
+project(vision_walking_controller LANGUAGES CXX)
 
 # mc_rtc
 add_project_dependency(mc_rtc REQUIRED)
