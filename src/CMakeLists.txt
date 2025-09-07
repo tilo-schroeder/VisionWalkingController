@@ -19,6 +19,13 @@ add_library(${CONTROLLER_NAME} SHARED
   )
 target_link_libraries(${CONTROLLER_NAME} PUBLIC mc_rtc::mc_control_fsm mc_rtc::mc_rtc_ros)
 
+set(ONNX_RT_LIB_DIR "${PROJECT_SOURCE_DIR}/include/BaselineWalkingController/onnx/lib")
+target_link_libraries(${CONTROLLER_NAME} PUBLIC
+  "${ONNX_RT_LIB_DIR}/libonnxruntime.so"
+  "${ONNX_RT_LIB_DIR}/libonnxruntime_providers_shared.so"
+)
+set_target_properties(${CONTROLLER_NAME} PROPERTIES BUILD_RPATH "${ONNX_RT_LIB_DIR}")
+
 if(DEFINED CATKIN_DEVEL_PREFIX)
   target_link_libraries(${CONTROLLER_NAME} PUBLIC ${catkin_LIBRARIES})
 else()
