@@ -42,7 +42,7 @@ public:
 
     void change_side() {
         if (side[0] == 1) {
-            side[0] = 0;
+            side[0] = -1;
         } else {
             side[0] = 1;
         }
@@ -54,12 +54,12 @@ private:
     Ort::SessionOptions session_options;
     std::unique_ptr<Ort::Session> session;
     std::vector<const char*> input_names = {"onnx::Shape_0", "onnx::Gather_1", "onnx::Unsqueeze_2", "onnx::Unsqueeze_3"};
-    std::vector<const char*> output_names = {"360", "362", "364"};
+    std::vector<const char*> output_names = {"361", "363", "365"};
     std::vector<int64_t> images_shape;
     std::vector<int64_t> sides_shape;
     std::vector<int64_t> loopback_shape;
     std::vector<int64_t> state_shape;
-    std::vector<float> side = {0};
+    std::vector<float> side = {1};
     std::vector<float> loopback = std::vector<float>(32, 0);
     std::vector<float> state = std::vector<float>(32, 0);
     std::vector<float> predictions;

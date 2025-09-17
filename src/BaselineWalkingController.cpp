@@ -137,7 +137,7 @@ BaselineWalkingController::BaselineWalkingController(mc_rbdyn::RobotModulePtr rm
   // Setup anchor
   setDefaultAnchor();
 
-  predictor_ = std::make_shared<OnnxModel>("model-v5.onnx", 4);
+  predictor_ = std::make_shared<OnnxModel>("model-v6.onnx", 4);
 
   mc_rtc::log::success("[BaselineWalkingController] Constructed.");
 }
@@ -254,22 +254,18 @@ bool BaselineWalkingController::run()
           
           // Interleave channels
           std::vector<uint8_t> stereo; stereo.reserve(H*W*2*3);
-          
-          // FIXME: Possible culprit for inference problems
 
           for(int c=0;c<3;++c)
-            for(int w=0;w<W;++w)
-              for(int h=0;h<H;++h){
-                stereo.push_back(L[(h*W+w)*3+(2-c)]);
-                
+            for(int h=0;h<H;++h)
+              for(int w=0;w<W;++w){
+                stereo.push_back(L[(h*W+w)*3+2-c]);
           }
           for(int c=0;c<3;++c)
-            for(int w=0;w<W;++w)
-              for(int h=0;h<H;++h){
-                stereo.push_back(R[(h*W+w)*3+(2-c)]);
+            for(int h=0;h<H;++h)
+              for(int w=0;w<W;++w){
+                stereo.push_back(R[(h*W+w)*3+2-c]);
           }
           std::vector<float> stereo_f(stereo.begin(), stereo.end());
-          for (int i = 0; i < stereo_f.size(); ++i) stereo_f[i] /= 255;
 
           float h = predictor_->process_frame(stereo_f);
           mc_rtc::log::info("HEIGHT: {}", h);
