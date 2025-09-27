@@ -2,10 +2,7 @@
 
 #include <mc_control/api.h>
 #include <mc_control/fsm/Controller.h>
-
 #include <BaselineWalkingController/FootTypes.h>
-
-#include <BaselineWalkingController/predictor.cpp>
 
 namespace mc_tasks
 {
@@ -22,6 +19,7 @@ namespace BWC
 {
 class FootManager;
 class CentroidalManager;
+class VisionManager;
 
 /** \brief Humanoid walking controller with various baseline methods. */
 struct MC_CONTROL_DLLAPI BaselineWalkingController : public mc_control::fsm::Controller
@@ -102,10 +100,11 @@ public:
   //! Centroidal manager
   std::shared_ptr<CentroidalManager> centroidalManager_;
 
+  //! Vision manager
+  std::shared_ptr<VisionManager> visionManager_;
+
   //! Whether to enable manager update
   bool enableManagerUpdate_ = false;
-
-  std::shared_ptr<OnnxModel> predictor_;
 
   struct PerceptionState
   {
