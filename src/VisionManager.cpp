@@ -5,8 +5,6 @@
 #include <BaselineWalkingController/BaselineWalkingController.h>
 #include <BaselineWalkingController/FootManager.h>
 
-// Bring in your inline implementation (class definition) of OnnxModel
-// If your predictor lives in namespace BWC in that file, wrap include accordingly.
 namespace BWC {
 #  include <BaselineWalkingController/predictor.cpp>
 }
