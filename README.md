@@ -1,8 +1,8 @@
 # VisionWalkingController
-Humanoid walking controller with various baseline methods
-
-[Original BaselineWalkingController](https://github.com/isri-aist/BaselineWalkingController)
 [![LICENSE](https://img.shields.io/github/license/isri-aist/BaselineWalkingController)](https://github.com/isri-aist/BaselineWalkingController/blob/master/LICENSE)
+
+
+Modification of the [BaselineWalkingController](https://github.com/isri-aist/BaselineWalkingController) with additions for object height prediction based on only a stereo camera array.
 
 # Additions
 Our additions to the walking controller can be configured by adding the following block to etc/BaselineWalkingController.in.yaml
@@ -31,5 +31,5 @@ VisionManager:
 
 
 # Usage
-The controller can be brought up with the instructions for the original BaselineWalkingController, but this was build for the [LookOMotion](https://github.com/tilo-schroeder/LookOMotion) project and it is easiest to get running in the devcontainer environment for that project.
+The controller can be brought up with the instructions for the original BaselineWalkingController, but requires quite a bit of extra environment work and was build for the [LookOMotion](https://github.com/tilo-schroeder/LookOMotion) project. It is easiest to get running in the devcontainer environment for that project.
 
