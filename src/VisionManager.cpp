@@ -37,19 +37,45 @@ VisionManager::VisionManager(BaselineWalkingController * ctl, const mc_rtc::Conf
     if(pc.has("onlyInDoubleSupport")) policy_.onlyInDoubleSupport = (bool)   pc("onlyInDoubleSupport");
   }
 
-  // After config is read, you can safely instantiate the model
-  // model_ = std::make_unique<OnnxModel>(onnxPath_, /*num_threads*/4);
-  model_ = std::make_shared<OnnxModel>(onnxPath_, 4);
+  
+  try {
+    model_ = std::make_shared<OnnxModel>(onnxPath_, 4);
+  } catch(const std::exception &e) {
+    mc_rtc::log::error("[Vision] Failed to load ONNX model '{}': {}", onnxPath_, e.what());
+    model_.reset();
+  }
 }
 
 VisionManager::~VisionManager(){ stop(); }
 
 void VisionManager::reset()
 {
+  //running_.store(true);
+  //enabled_.store(true);
+  //// start worker
+  //worker_ = std::thread(&VisionManager::threadLoop_, this);
+
+  mc_rtc::log::info("[Vision] reset() called");
+
+  if(!ctl_->datastore().has("MuJoCo::GetCameraRGB")) {
+    mc_rtc::log::warning("[Vision] Datastore MuJoCo::GetCameraRGB not available; vision disabled.");
+    enabled_.store(false);
+    return;
+  }
+  if(!model_) {
+    mc_rtc::log::warning("[Vision] Model not loaded; vision disabled.");
+    enabled_.store(false);
+    return;
+  }
   running_.store(true);
   enabled_.store(true);
-  // start worker
-  worker_ = std::thread(&VisionManager::threadLoop_, this);
+  try {
+    worker_ = std::thread(&VisionManager::threadLoop_, this);
+  } catch(const std::exception &e) {
+    mc_rtc::log::error("[Vision] Failed to start worker thread: {}", e.what());
+    running_.store(false);
+    enabled_.store(false);
+  }
 }
 
 void VisionManager::stop()
@@ -150,7 +176,6 @@ void VisionManager::forceDecision(ObstacleDecision d) { decision_.store(d); }
 bool VisionManager::grabStereo_(std::vector<uint8_t> &L, std::vector<uint8_t> &R, int &W, int &H, double &stamp)
 {
   if(!ctl_->datastore().has("MuJoCo::GetCameraRGB")) return false;
-  // You can also support CameraSensor path here if available.
   bool okL = ctl_->datastore().call<bool, const std::string&, std::vector<uint8_t>&, int&, int&, double&>(
                "MuJoCo::GetCameraRGB", leftCamName_, L, W, H, stamp);
   bool okR = ctl_->datastore().call<bool, const std::string&, std::vector<uint8_t>&, int&, int&, double&>(
@@ -166,7 +191,7 @@ void VisionManager::threadLoop_()
   while(running_.load())
   {
     if(!enabled_.load()) { std::this_thread::sleep_for(std::chrono::milliseconds(50)); continue; }
-
+    try {
     // Gating by DS (optional)
     if(policy_.onlyInDoubleSupport) {
       if(ctl_->footManager_->getCurrentContactFeet().size() != 2) { std::this_thread::sleep_for(std::chrono::milliseconds(10)); continue; }
@@ -205,7 +230,7 @@ void VisionManager::threadLoop_()
 
     float h = model_->process_frame(input);
 
-    mc_rtc::log::info("HEIGHT: %s", h);
+    mc_rtc::log::info("HEIGHT: {}", h);
 
     // Simple IIR + stability
     if(!valid_.load()) { filt_ = h; valid_.store(true); stableCount_.store(1); }
@@ -226,5 +251,15 @@ void VisionManager::threadLoop_()
     decision_.store(newD);
 
     lastInferWall_ = now;
+        } catch(const Ort::Exception &e) {
+      mc_rtc::log::error("[Vision] ONNX error: {}", e.what());
+      enabled_.store(false); // stop doing work, keep controller alive
+    } catch(const std::exception &e) {
+      mc_rtc::log::error("[Vision] Exception: {}", e.what());
+      enabled_.store(false);
+    } catch(...) {
+      mc_rtc::log::error("[Vision] Unknown exception in worker, disabling.");
+      enabled_.store(false);
+    }
   }
 }

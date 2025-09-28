@@ -38,7 +38,10 @@ void VisionApplyStepUp::start(mc_control::fsm::Controller & ctl_)
   sva::PTransformd onMid = approachMid; onMid.translation().z() += r.heightFilt;
   mc_rtc::Configuration swingCfg;
   swingCfg.add("type", "IndHorizontalVertical");
-  swingCfg.add("clearance", r.heightFilt + pol.stepClearanceMargin);
+
+  // Peak height above the higher of start/end z: 
+  const double dz = r.heightFilt + pol.stepClearanceMargin;
+  swingCfg.add("verticalTopOffset", std::vector<double>{0.0, 0.0, dz});
 
   auto fs2 = ctl.footManager_->makeFootstep(opposite(nextSwing), onMid, fs1.transitEndTime);
   fs2.swingTrajConfig = swingCfg;

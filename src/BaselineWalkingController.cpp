@@ -205,7 +205,7 @@ void BaselineWalkingController::reset(const mc_control::ControllerResetData & re
     cams = datastore().call<std::vector<std::string>>("MuJoCo::ListCameras");
     mc_rtc::log::info("MuJoCo exposed cameras: \n");
     for(auto &s: cams) {
-      mc_rtc::log::info(s);
+      mc_rtc::log::info("{}", s);
     }
   }
 

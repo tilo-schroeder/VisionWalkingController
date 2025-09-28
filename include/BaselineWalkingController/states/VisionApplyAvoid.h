@@ -16,5 +16,11 @@ public:
   /** \brief Teardown. */
   void teardown(mc_control::fsm::Controller & ctl) override;
 
+private:
+  // SideStep mode bookkeeping
+  int    stepsDone_{0};
+  int    clearCount_{0};
+  double lastPlanTime_{0.0};
+
 };
 } // namespace BWC

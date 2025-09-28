@@ -14,10 +14,17 @@ namespace BWC {
 struct BaselineWalkingController;
 class OnnxModel; 
 
+enum class AvoidMode { Curve, SideStep };
 enum class ObstacleDecision { NONE, STEP_UP, AVOID };
 
 struct VisionPolicy
 {
+  // Strategy
+  AvoidMode avoidMode{AvoidMode::Curve};
+  int  maxSideSteps{8};
+  int  sidestepSign{+1};       // +1: +Y, -1: -Y
+  int  clearStableCount{3};    // consecutive "not AVOID" ticks to finish
+  
   double maxStepHeight{0.20};
   double hysteresis{0.02};
   double minInferPeriod{0.10};
@@ -30,6 +37,16 @@ struct VisionPolicy
   // Let mc_rtc load/save this type
   void load(const mc_rtc::Configuration & c)
   {
+    if(c.has("avoidMode")) {
+      auto s = std::string(c("avoidMode"));
+      std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+      if(s == "SideStep") avoidMode = AvoidMode::SideStep;
+      else                avoidMode = AvoidMode::Curve;
+    }
+    c("maxSideSteps", maxSideSteps);
+    c("sidestepSign", sidestepSign);
+    c("clearStableCount", clearStableCount);
+    
     c("maxStepHeight", maxStepHeight);
     c("hysteresis", hysteresis);
     c("minInferPeriod", minInferPeriod);
@@ -42,6 +59,10 @@ struct VisionPolicy
   }
   void save(mc_rtc::Configuration & c) const
   {
+    c.add("avoidMode", avoidMode == AvoidMode::SideStep ? "SideStep" : "Curve");
+    c.add("maxSideSteps", maxSideSteps);
+    c.add("sidestepSign", sidestepSign);
+    c.add("clearStableCount", clearStableCount);
     c.add("maxStepHeight", maxStepHeight);
     c.add("hysteresis", hysteresis);
     c.add("minInferPeriod", minInferPeriod);

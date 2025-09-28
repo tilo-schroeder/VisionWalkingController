@@ -37,11 +37,6 @@ states:
   BWC::GuiWalk_:
     base: BWC::GuiWalk
 
-  BWC::Teleop_:
-    base: BWC::Teleop
-    configs:
-      twistTopicName: /cmd_vel
-
 # Vision states
   BWC::VisionMonitor_:
     base: BWC::VisionMonitor
@@ -54,7 +49,7 @@ states:
 
   BWC::Main_:
     base: Parallel
-    states: [BWC::GuiWalk_, BWC::Teleop_, BWC::VisionMonitor_]
+    states: [BWC::GuiWalk_, BWC::VisionMonitor_]
 
 transitions:
   - [BWC::Initial_, OK, BWC::Main_, Auto]
@@ -69,19 +64,23 @@ init: BWC::Initial_
 
 VisionManager:
   Cameras:
-    left:  ${left_cam_name_if_not_autodetected}
-    right: ${right_cam_name_if_not_autodetected}
+    left:  REEMC_eye_left
+    right: REEMC_eye_right
   OnnxPath: model-v6.onnx
   Policy:
-    maxStepHeight: 0.20
+    avoidMode: SideStep
+    sidestepSign: 1            # +1 left (Y+), -1 right (Y-)
+    maxSideSteps: 10
+    clearStableCount: 3
+    maxStepHeight: 0.50
     hysteresis: 0.02
     minInferPeriod: 0.10
     minDSLead: 0.15
-    stepClearanceMargin: 0.05
+    stepClearanceMargin: 0.30
     approachStride: 0.25
     sideStep: 0.50
     aroundForward: 1.00
-    onlyInDoubleSupport: true
+    onlyInDoubleSupport: false
 
 
 ObserverPipelines:

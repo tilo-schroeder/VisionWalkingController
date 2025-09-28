@@ -2,13 +2,10 @@
   <name>vision_walking_controller</name>
   <version>0.1.0</version>
   <description>
-    Humanoid walking controller with various baseline methods
+    Modification of Masaki Murooka's humanoid walking controller with various baseline methods
   </description>
-  <maintainer email="m-murooka@aist.go.jp">Masaki Murooka</maintainer>
+  <maintainer email="maintainer@example.org">maintainer</maintainer>
   <license>BSD</license>
-
-  <url>http://ros.org/wiki/baseline_walking_controller</url>
-  <author>Masaki Murooka</author>
 
   <buildtool_depend>catkin</buildtool_depend>
 

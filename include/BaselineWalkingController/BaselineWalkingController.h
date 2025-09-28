@@ -106,34 +106,6 @@ public:
   //! Whether to enable manager update
   bool enableManagerUpdate_ = false;
 
-  struct PerceptionState
-  {
-    double lastStamp{0.0};
-    double lastInferTime{ -1.0 };
-    float  heightFilt{0.f};
-    bool   valid{false};
-    int    stableCount{0};
-  };
-
-  enum class ObstacleDecision { NONE, STEP_UP, AVOID };
-
-  struct ObstaclePolicy
-  {
-    double maxStepHeight{0.2};     // [m] step ON if h <= this
-    double hysteresis{0.02};        // [m] for stability
-    double minInferPeriod{0.10};    // [s] run NN at most 10 Hz
-    double minDSLead{0.15};         // [s] need this much time left in DS before next swing
-    double stepClearanceMargin{0.05}; // [m] extra swing height above block
-    double approachStride{0.25};    // [m] forward stride length
-    double sideStep{0.5};          // [m] lateral for go-around
-    double aroundForward{1.0};     // [m] forward distance while avoiding
-  };
-
-  PerceptionState perc_;
-  ObstaclePolicy policy_;
-  ObstacleDecision decision_{ObstacleDecision::NONE};
-  double decisionStamp_{0.0};
-
 protected:
   //! Controller name
   std::string name_ = "BWC";
