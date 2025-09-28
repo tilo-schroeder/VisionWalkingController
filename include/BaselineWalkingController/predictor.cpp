@@ -53,7 +53,7 @@ private:
     std::unique_ptr<Ort::Env> env;
     Ort::SessionOptions session_options;
     std::unique_ptr<Ort::Session> session;
-    std::vector<const char*> input_names = {"onnx::Shape_0", "onnx::Gather_1", "onnx::Unsqueeze_2", "onnx::Unsqueeze_3"};
+    std::vector<const char*> input_names = {"inp.1", "inp.7", "inp.5", "inp.9"};
     std::vector<const char*> output_names = {"361", "363", "365"};
     std::vector<int64_t> images_shape;
     std::vector<int64_t> sides_shape;

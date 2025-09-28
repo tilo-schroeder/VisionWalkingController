@@ -6,6 +6,7 @@
 #include <BaselineWalkingController/BaselineWalkingController.h>
 #include <BaselineWalkingController/CentroidalManager.h>
 #include <BaselineWalkingController/FootManager.h>
+#include <BaselineWalkingController/VisionManager.h>
 #include <BaselineWalkingController/states/InitialState.h>
 
 using namespace BWC;
@@ -80,6 +81,9 @@ bool InitialState::run(mc_control::fsm::Controller &)
     // it is safe to call the update method once and then add the logger
     ctl().footManager_->addToLogger(ctl().logger());
     ctl().centroidalManager_->addToLogger(ctl().logger());
+    if(ctl().visionManager_) {
+      ctl().visionManager_->addToLogger(ctl().logger());
+    }    
   }
 
   // Interpolate task stiffness

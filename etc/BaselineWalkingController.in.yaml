@@ -37,23 +37,50 @@ states:
   BWC::GuiWalk_:
     base: BWC::GuiWalk
 
-  BWC::Teleop_:
-    base: BWC::Teleop
-    configs:
-      twistTopicName: /cmd_vel
+# Vision states
+  BWC::VisionMonitor_:
+    base: BWC::VisionMonitor
+  
+  BWC::VisionApplyStepUp_:
+    base: BWC::VisionApplyStepUp
+  
+  BWC::VisionApplyAvoid_:
+    base: BWC::VisionApplyAvoid
 
   BWC::Main_:
     base: Parallel
-    states: [BWC::GuiWalk_, BWC::Teleop_]
+    states: [BWC::GuiWalk_, BWC::VisionMonitor_]
 
-# Transitions map
 transitions:
   - [BWC::Initial_, OK, BWC::Main_, Auto]
-# Initial state
+  # Reactions from the monitor (event names come from VisionMonitorState)
+  - [BWC::VisionMonitor_, STEP_UP, BWC::VisionApplyStepUp_, Auto]
+  - [BWC::VisionApplyStepUp_, DONE, BWC::Main_, Auto]
+
+  - [BWC::VisionMonitor_, AVOID,  BWC::VisionApplyAvoid_,  Auto]
+  - [BWC::VisionApplyAvoid_,  DONE, BWC::Main_, Auto]
+
 init: BWC::Initial_
 
-transitions:
-  - [BWC::Initial_, OK, BWC::ConfigWalk_, Auto]
+VisionManager:
+  Cameras:
+    left:  REEMC_eye_left
+    right: REEMC_eye_right
+  OnnxPath: model-v7.onnx
+  Policy:
+    avoidMode: SideStep
+    sidestepSign: 1            # +1 left (Y+), -1 right (Y-)
+    maxSideSteps: 10
+    clearStableCount: 3
+    maxStepHeight: 0.50
+    hysteresis: 0.02
+    minInferPeriod: 0.10
+    minDSLead: 0.15
+    stepClearanceMargin: 0.30
+    approachStride: 0.25
+    sideStep: 0.50
+    aroundForward: 1.00
+    onlyInDoubleSupport: false
 
 
 ObserverPipelines:

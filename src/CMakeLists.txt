@@ -7,6 +7,7 @@ add_library(${CONTROLLER_NAME} SHARED
   FootTypes.cpp
   FootManager.cpp
   CentroidalManager.cpp
+  VisionManager.cpp
   centroidal/CentroidalManagerPreviewControlZmp.cpp
   centroidal/CentroidalManagerDdpZmp.cpp
   centroidal/CentroidalManagerFootGuidedControl.cpp

@@ -10,6 +10,18 @@ add_fsm_state(GuiWalkState GuiWalkState.cpp)
 target_link_libraries(GuiWalkState PUBLIC
   ${CONTROLLER_NAME})
 
+add_fsm_state(VisionMonitorState VisionMonitorState.cpp)
+target_link_libraries(VisionMonitorState PUBLIC
+  ${CONTROLLER_NAME})
+
+add_fsm_state(VisionApplyStepUp VisionApplyStepUp.cpp)
+target_link_libraries(VisionApplyStepUp PUBLIC
+  ${CONTROLLER_NAME})
+
+add_fsm_state(VisionApplyAvoid VisionApplyAvoid.cpp)
+target_link_libraries(VisionApplyAvoid PUBLIC 
+  ${CONTROLLER_NAME})
+
 if(DEFINED CATKIN_DEVEL_PREFIX)
   add_fsm_state(RosWalkState RosWalkState.cpp)
   target_link_libraries(RosWalkState PUBLIC
