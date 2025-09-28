@@ -37,7 +37,7 @@ VisionManager::VisionManager(BaselineWalkingController * ctl, const mc_rtc::Conf
     if(pc.has("onlyInDoubleSupport")) policy_.onlyInDoubleSupport = (bool)   pc("onlyInDoubleSupport");
   }
 
-  
+
   try {
     model_ = std::make_shared<OnnxModel>(onnxPath_, 4);
   } catch(const std::exception &e) {
@@ -50,13 +50,6 @@ VisionManager::~VisionManager(){ stop(); }
 
 void VisionManager::reset()
 {
-  //running_.store(true);
-  //enabled_.store(true);
-  //// start worker
-  //worker_ = std::thread(&VisionManager::threadLoop_, this);
-
-  mc_rtc::log::info("[Vision] reset() called");
-
   if(!ctl_->datastore().has("MuJoCo::GetCameraRGB")) {
     mc_rtc::log::warning("[Vision] Datastore MuJoCo::GetCameraRGB not available; vision disabled.");
     enabled_.store(false);
@@ -84,10 +77,7 @@ void VisionManager::stop()
   if(worker_.joinable()) worker_.join();
 }
 
-void VisionManager::update()
-{
-  // Nothing heavy here; just sanity if you ever need to react each tick
-}
+void VisionManager::update() {}
 
 void VisionManager::addToGUI(mc_rtc::gui::StateBuilder & gui)
 {
@@ -207,7 +197,6 @@ void VisionManager::threadLoop_()
     std::vector<uint8_t> L, R; int W=0,H=0; double stamp=0.0;
     if(!grabStereo_(L,R,W,H,stamp)) { std::this_thread::sleep_for(std::chrono::milliseconds(10)); continue; }
 
-    // Keep side-by-side preview for GUI (optional)
     {
       std::lock_guard<std::mutex> lk(previewMtx_);
       previewW_ = 2*W; previewH_ = H;
@@ -222,15 +211,13 @@ void VisionManager::threadLoop_()
 
     // Preprocess & inference (keep it simple: planarize HWC->float[0..1])
     std::vector<float> input; input.reserve((size_t)W*H*2*3);
-    // (example: concatenate L then R by channel-major, matching your model)
+
     for(int c=0;c<3;c++) for(int y=0;y<H;y++) for(int x=0;x<W;x++)
-      input.push_back(L[(y*W+x)*3+(2-c)]/255.f);
+      input.push_back(L[(y*W+x)*3+(2-c)]);
     for(int c=0;c<3;c++) for(int y=0;y<H;y++) for(int x=0;x<W;x++)
-      input.push_back(R[(y*W+x)*3+(2-c)]/255.f);
+      input.push_back(R[(y*W+x)*3+(2-c)]);
 
     float h = model_->process_frame(input);
-
-    mc_rtc::log::info("HEIGHT: {}", h);
 
     // Simple IIR + stability
     if(!valid_.load()) { filt_ = h; valid_.store(true); stableCount_.store(1); }

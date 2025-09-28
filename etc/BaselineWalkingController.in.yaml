@@ -66,7 +66,7 @@ VisionManager:
   Cameras:
     left:  REEMC_eye_left
     right: REEMC_eye_right
-  OnnxPath: model-v6.onnx
+  OnnxPath: model-v7.onnx
   Policy:
     avoidMode: SideStep
     sidestepSign: 1            # +1 left (Y+), -1 right (Y-)
