@@ -11,41 +11,46 @@ void VisionApplyStepUp::start(mc_control::fsm::Controller & ctl_)
 {
   auto & ctl = static_cast<BaselineWalkingController&>(ctl_);
   auto pol = ctl.visionManager_->policy();
-  auto r = ctl.visionManager_->reading();
+  auto r   = ctl.visionManager_->reading();
 
-  // pick next swing
+  // Decide the swing foot: keep any queued choice, otherwise use the front foot
   Foot nextSwing = Foot::Left;
   if(!ctl.footManager_->footstepQueue().empty())
   {
     nextSwing = ctl.footManager_->footstepQueue().front().foot;
   }
+  else
+  {
+    const auto & l = ctl.footManager_->targetFootPose(Foot::Left).translation();
+    const auto & rr = ctl.footManager_->targetFootPose(Foot::Right).translation();
+    nextSwing = (l.x() > rr.x()) ? Foot::Left : Foot::Right; // lead with the front foot
+  }
 
-  // ensure DS
+  // Ensure DS before planning a single step
   ctl.footManager_->clearFootstepQueue();
 
-  auto mid = sva::interpolate( ctl.footManager_->targetFootPose(Foot::Left),
-                               ctl.footManager_->targetFootPose(Foot::Right), 0.5 );
-  sva::PTransformd approachMid( sva::RotZ(0.0),
-       mid.translation() + Eigen::Vector3d(pol.approachStride,0,0));
+  // Reference heading from the mid pose (forward = robot heading)
+  auto mid = sva::interpolate(
+      ctl.footManager_->targetFootPose(Foot::Left),
+      ctl.footManager_->targetFootPose(Foot::Right), 0.5);
 
-  double start = std::max(ctl.t() + 0.8,
-                          ctl.footManager_->footstepQueue().empty()
-                            ? ctl.t() : ctl.footManager_->footstepQueue().back().transitEndTime + 1e-3);
+  // Build the single target: advance forward, and raise by obstacle height
+  auto swingStart = ctl.footManager_->targetFootPose(nextSwing);
+  sva::PTransformd target = swingStart;
+  target.translation() += mid.rotation() * Eigen::Vector3d(pol.approachStride, 0.0, 0.0); // FORWARD
+  target.translation().z() += r.heightFilt;                                               // and UP
 
-  auto fs1 = ctl.footManager_->makeFootstep(nextSwing, approachMid, start);
-  ctl.footManager_->appendFootstep(fs1);
+  // Timing
+  double start = std::max(ctl.t() + 0.8, ctl.t());
 
-  sva::PTransformd onMid = approachMid; onMid.translation().z() += r.heightFilt;
+  // One step: swing nextSwing directly to the forward+up target
   mc_rtc::Configuration swingCfg;
   swingCfg.add("type", "IndHorizontalVertical");
+  swingCfg.add("clearance", r.heightFilt + pol.stepClearanceMargin); // peak above higher of start/end
 
-  // Peak height above the higher of start/end z: 
-  const double dz = r.heightFilt + pol.stepClearanceMargin;
-  swingCfg.add("verticalTopOffset", std::vector<double>{0.0, 0.0, dz});
-
-  auto fs2 = ctl.footManager_->makeFootstep(opposite(nextSwing), onMid, fs1.transitEndTime);
-  fs2.swingTrajConfig = swingCfg;
-  ctl.footManager_->appendFootstep(fs2);
+  auto fs = ctl.footManager_->makeFootstep(nextSwing, target, start);
+  fs.swingTrajConfig = swingCfg;
+  ctl.footManager_->appendFootstep(fs);
 
   output("DONE");
 }
